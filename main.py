@@ -32,7 +32,7 @@ vector_db = QdrantVectorStore.from_existing_collection(
     collection_name="BookWise",
     embedding=embedding_model
 )
-st.title("🦜🔗 Quickstart App")
+st.title("🦜🔗 Book Wise Chat")
 query = st.text_input("Enter your question:")
 
 if query:
@@ -59,7 +59,7 @@ if query:
     """
 
     chat_completion = client.chat.completions.create(
-        model="gpt-4o",  # Fixed model name
+        model="gpt-4o-mini",  # Fixed model name
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": query},
