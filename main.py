@@ -7,6 +7,17 @@ from langchain_qdrant import QdrantVectorStore
 from langchain_openai import OpenAIEmbeddings
 from openai import OpenAI
 
+
+OPENAI_API_KEY = st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY", ""))
+QDRANT_URL = st.secrets.get("QDRANT_URL", os.getenv("QDRANT_URL", ""))
+QDRANT_API_KEY = st.secrets.get("QDRANT_API_KEY", os.getenv("QDRANT_API_KEY", ""))
+
+if not OPENAI_API_KEY:
+    st.error("OPENAI_API_KEY is not set. Add it to .streamlit/secrets.toml or your environment.")
+    st.stop()
+
+os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
+
 load_dotenv()
 client = OpenAI()
 
@@ -16,7 +27,8 @@ embedding_model = OpenAIEmbeddings(
 )
 
 vector_db = QdrantVectorStore.from_existing_collection(
-    url="http://localhost:6333",
+    url=QDRANT_URL if QDRANT_URL else None,
+    api_key=QDRANT_API_KEY if QDRANT_API_KEY else None,
     collection_name="BookWise",
     embedding=embedding_model
 )

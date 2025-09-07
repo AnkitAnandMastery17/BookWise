@@ -9,6 +9,8 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_qdrant import QdrantVectorStore
 
 load_dotenv()
+QDRANT_URL = os.getenv("QDRANT_URL")
+QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")
 
 loader = WebBaseLoader("https://docs.chaicode.com/youtube/getting-started/")
 docs = loader.load()
@@ -27,7 +29,8 @@ embedding_model = OpenAIEmbeddings(
 
 vector_store = QdrantVectorStore.from_documents(
     documents=split_docs,
-    url="http://localhost:6333",
+    url=QDRANT_URL,
+    api_key=QDRANT_API_KEY,
     collection_name="BookWise",
     embedding=embedding_model
 )
