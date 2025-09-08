@@ -9,7 +9,6 @@ from openai import OpenAI
 
 
 OPENAI_API_KEY = st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY", ""))
-QDRANT_URL = st.secrets.get("QDRANT_URL", os.getenv("QDRANT_URL", ""))
 QDRANT_API_KEY = st.secrets.get("QDRANT_API_KEY", os.getenv("QDRANT_API_KEY", ""))
 
 if not OPENAI_API_KEY:
@@ -27,7 +26,6 @@ embedding_model = OpenAIEmbeddings(
 )
 
 vector_db = QdrantVectorStore.from_existing_collection(
-    url=QDRANT_URL if QDRANT_URL else None,
     api_key=QDRANT_API_KEY if QDRANT_API_KEY else None,
     collection_name="BookWise",
     embedding=embedding_model
@@ -40,17 +38,20 @@ if query:
         query=query
     )
 
-    context = "\n\n\n".join([
-        f"Page Content: {result.page_content}\n"
-        f"Website: {result.metadata.get('source', 'Unknown')}\n"
-        f"Page Title: {result.metadata.get('title', 'Unknown')}"
-        for result in search_results
-    ])
+    context = "\n\n\n".join(
+        [
+            f"Page Content: {doc.page_content}\n"
+            f"Website: {doc.metadata.get('source', 'Unknown')}\n"
+            f"Page Title: {doc.metadata.get('title', 'Unknown')}"
+            for doc in search_results
+        ]
+    )
+  
 
     SYSTEM_PROMPT = f"""
     You are a helpful AI Assistant who answers user queries based on the available context
     retrieved from web pages along with their source URLs and page titles.
-
+    
     You should only answer the user based on the following context and guide the user
     to visit the source website for more detailed information.
 
@@ -59,7 +60,7 @@ if query:
     """
 
     chat_completion = client.chat.completions.create(
-        model="gpt-4o-mini",  # Fixed model name
+        model="gpt-4o",  # Fixed model name
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": query},
